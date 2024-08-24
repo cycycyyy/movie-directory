@@ -68,7 +68,11 @@ const showSearch = ref(false);
           color="black"
           variant="ghost"
           aria-label="Theme"
-          @click="showSearch = !showSearch"
+          @click="
+            () => {
+              showSearch = !showSearch;
+            }
+          "
         />
         <span
           class="lg:-rotate-90 flex items-center gap-2 text-primary text-2xl uppercase font-bold"
@@ -86,8 +90,8 @@ const showSearch = ref(false);
       </div>
       <div class="relative">
         <div
-          class="search absolute z-20 top-2 flex justify-center w-full transition-all"
-          :class="showSearch ? '-top-40' : 'top-2'"
+          class="search absolute z-20 flex justify-center w-full transition-all"
+          :class="!showSearch ? '-top-40' : 'top-2'"
         >
           <!-- Add 'loading' prop for loading state in Input -->
           <UInput
@@ -102,7 +106,7 @@ const showSearch = ref(false);
             :ui="{
               icon: { trailing: { pointer: '' } },
               color: {
-                gray: {outline: 'dark:bg-black/80 dark:ring-black/80'}
+                gray: { outline: 'dark:bg-black/80 dark:ring-black/80' },
               },
             }"
           >
