@@ -72,6 +72,7 @@ const showSearch = ref(false);
           @click="
             () => {
               showSearch = !showSearch;
+              
             }
           "
         />
@@ -97,6 +98,7 @@ const showSearch = ref(false);
             v-for="(movie, index) in TRENDING_MOVIES.results.slice(0, 10)"
             :key="index"
             class="flex flex-col flex-grow xl:basis-[calc(100%/5)] lg:basis-[calc(100%/4)] sm:basis-[calc(100%/3)] basis-[calc(100%/2)] movie-poster-card"
+            v-motion-slide-visible-top
           >
             <div class="h-[50vh] w-full relative transition-all">
               <img

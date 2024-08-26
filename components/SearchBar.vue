@@ -1,6 +1,6 @@
 <template>
   <div
-    class="search absolute z-20 flex flex-col items-center justify-center w-full transition-all"
+    class="search absolute z-20 flex flex-col items-center justify-center w-full transition-all px-5"
     :class="!showSearch ? '-top-40' : 'lg:top-2 top-5'"
   >
     <!-- Add 'loading' prop for loading state in Input -->
@@ -37,10 +37,21 @@
     <div
       class="max-w-[500px] w-full max-h-[50vh] h-full overflow-y-scroll flex-col flex dark:bg-black/80 bg-white rounded-b-lg"
       v-if="searchResults.total_results > 0"
+      v-motion-fade
     >
       <div
         class="p-2 hover:bg-primary/60 transition-all cursor-pointer hover:font-semibold"
         v-for="result in searchResults.results"
+        @click="
+          () => {
+            router.push({
+              path: '/movie-information',
+              query: {
+                id: result.id,
+              },
+            });
+          }
+        "
       >
         <div class="flex items-center gap-3">
           <div class="w-11 h-full flex justify-center items-center">
@@ -57,7 +68,9 @@
           </div>
           <div class="flex flex-col w-full h-full">
             <span class="w-full"> {{ result.title }}</span>
-            <span class="text-xs">{{ dayjs(result.release_date).format('YYYY') }}</span>
+            <span class="text-xs">{{
+              dayjs(result.release_date).format("YYYY")
+            }}</span>
           </div>
         </div>
       </div>
@@ -65,6 +78,7 @@
     <div
       class="bg-white dark:bg-black/80 max-w-[500px] w-full py-5 text-center rounded-b-lg"
       v-if="searchResults.total_results < 1"
+      v-motion-fade
     >
       <span>No results found</span>
     </div>
@@ -72,8 +86,9 @@
 </template>
 
 <script lang="ts" setup>
-import { useDayjs } from '#dayjs' 
-const dayjs = useDayjs()
+import { useDayjs } from "#dayjs";
+const dayjs = useDayjs();
+const router = useRouter();
 
 interface MovieResult {
   adult: boolean;
@@ -135,6 +150,10 @@ const searchMovies = async (query: string) => {
   } catch (error) {
     return Promise.reject(error);
   }
+};
+
+const clearSearchResults = () => {
+  searchResults.value = {} as MovieResponse;
 };
 
 watch(searchQuery, async () => {
