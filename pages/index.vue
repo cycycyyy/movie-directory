@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useDayjs } from '#dayjs' 
+const dayjs = useDayjs()
 import type { _backgroundColor } from "#tailwind-config/theme";
 
 // For Color Mode
@@ -52,7 +54,6 @@ const { data: trendingMovies, error } = await useAsyncData(
 
 TRENDING_MOVIES.value = trendingMovies.value as MovieResponse;
 
-const searchQuery = ref("");
 const showSearch = ref(false);
 </script>
 
@@ -64,7 +65,7 @@ const showSearch = ref(false);
         class="sidebar lg:w-[75px] bg-black/5 flex lg:flex-col items-center justify-center gap-5 lg:gap-20 py-5"
       >
         <UButton
-          :icon="!showSearch ? 'i-lucide-x' : 'i-lucide-search'"
+          :icon="showSearch ? 'i-lucide-x' : 'i-lucide-search'"
           color="black"
           variant="ghost"
           aria-label="Theme"
@@ -89,38 +90,8 @@ const showSearch = ref(false);
         />
       </div>
       <div class="relative">
-        <div
-          class="search absolute z-20 flex justify-center w-full transition-all"
-          :class="!showSearch ? '-top-40' : 'top-2'"
-        >
-          <!-- Add 'loading' prop for loading state in Input -->
-          <UInput
-            v-model="searchQuery"
-            color="gray"
-            variant="outline"
-            class="max-w-[500px] w-full mx-5 transition-all delay-200"
-            placeholder="Search something awesome..."
-            size="xl"
-            icon="i-heroicons-magnifying-glass-20-solid"
-            autocomplete="off"
-            :ui="{
-              icon: { trailing: { pointer: '' } },
-              color: {
-                gray: { outline: 'dark:bg-black/80 dark:ring-black/80' },
-              },
-            }"
-          >
-            <template #trailing>
-              <UButton
-                v-show="searchQuery !== ''"
-                color="gray"
-                variant="link"
-                icon="i-heroicons-x-mark-20-solid"
-                :padded="false"
-                @click="searchQuery = ''"
-              /> </template
-          ></UInput>
-        </div>
+        
+        <SearchBar :showSearch="showSearch"/>
         <div v-if="TRENDING_MOVIES" class="flex flex-wrap w-full">
           <div
             v-for="(movie, index) in TRENDING_MOVIES.results.slice(0, 10)"
@@ -152,9 +123,9 @@ const showSearch = ref(false);
                       }}</span
                     >
                     <span class="text-xs pl-2 flex items-center gap-1"
-                      ><UIcon name="i-lucide-calendar" />{{
-                        movie.release_date
-                      }}</span
+                      ><UIcon name="i-lucide-calendar" />
+                      
+                      {{ dayjs(movie.release_date).format('YYYY') }}</span
                     >
                   </div>
                   <span class="text-xs">{{ movie.overview }}</span>
