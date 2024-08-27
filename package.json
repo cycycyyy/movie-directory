@@ -16,6 +16,7 @@
     "vue": "latest"
   },
   "devDependencies": {
+    "@iconify-json/lucide": "^1.1.208",
     "dayjs-nuxt": "^2.1.11"
   }
 }

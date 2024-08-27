@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { useDayjs } from '#dayjs' 
-const dayjs = useDayjs()
+import { useDayjs } from "#dayjs";
+const dayjs = useDayjs();
+const router = useRouter();
+
 import type { _backgroundColor } from "#tailwind-config/theme";
 
 // For Color Mode
@@ -41,58 +43,24 @@ const TRENDING_MOVIES = ref({} as MovieResponse); // For Trending Movies
 
 const { data: trendingMovies, error } = await useAsyncData(
   "trending-movies",
-  () =>
-    $fetch("https://api.themoviedb.org/3/trending/movie/day?language=en-US", {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NmQ0YzU4ZTA0ZDA5MjFjMTU1ZGE4NzM2MzBkMGUyMiIsIm5iZiI6MTcyNDQxODE3OC45MDM3MDksInN1YiI6IjY2YzZmYTdhNTRmYjFmZjA0YTkxOGI0MCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.EyrGfAWpyIqq-Z5wdXCsednIyO1q57RW0Z9jWvpKLw0",
-      },
-    })
+  () => {
+    const API_URL = useRuntimeConfig().public.TMDB_API_URL;
+    const API_KEY = useRuntimeConfig().public.TMDB_API_KEY;
+    return $fetch(
+      `${API_URL}/trending/movie/day?language=en-US&api_key=${API_KEY}`
+    );
+  }
 );
 
 TRENDING_MOVIES.value = trendingMovies.value as MovieResponse;
-
-const showSearch = ref(false);
 </script>
 
 <template class="">
   <ClientOnly>
     <div class="lg:flex relative shadow-lg shadow-yellow-400">
       <!-- <span class="absolute z-20 bottom-0 right-0 p-10 text-2xl font-bold shadow-xl" :class="isDark ? 'text-white' : 'text-primary'">Popular Movies 2024</span> -->
-      <div
-        class="sidebar lg:w-[75px] bg-black/5 flex lg:flex-col items-center justify-center gap-5 lg:gap-20 py-5"
-      >
-        <UButton
-          :icon="showSearch ? 'i-lucide-x' : 'i-lucide-search'"
-          color="black"
-          variant="ghost"
-          aria-label="Theme"
-          @click="
-            () => {
-              showSearch = !showSearch;
-              
-            }
-          "
-        />
-        <span
-          class="lg:-rotate-90 flex items-center gap-2 text-primary text-2xl uppercase font-bold"
-          ><UIcon name="i-lucide-film" class="w-5 h-5" /> CineNest</span
-        >
-        <UButton
-          :icon="
-            isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'
-          "
-          color="black"
-          variant="ghost"
-          aria-label="Theme"
-          @click="isDark = !isDark"
-        />
-      </div>
+      <MenuBar :useAsHeader="false"/>
       <div class="relative">
-        
-        <SearchBar :showSearch="showSearch"/>
         <div v-if="TRENDING_MOVIES" class="flex flex-wrap w-full">
           <div
             v-for="(movie, index) in TRENDING_MOVIES.results.slice(0, 10)"
@@ -112,6 +80,16 @@ const showSearch = ref(false);
               >
                 <span
                   class="font-semibold uppercase text-lg text-primary hover:underline cursor-pointer"
+                  @click="
+                    () => {
+                      router.push({
+                        path: '/movie-information',
+                        query: {
+                          id: movie.id,
+                        },
+                      });
+                    }
+                  "
                   >{{ movie.title }}</span
                 >
                 <div
@@ -126,8 +104,8 @@ const showSearch = ref(false);
                     >
                     <span class="text-xs pl-2 flex items-center gap-1"
                       ><UIcon name="i-lucide-calendar" />
-                      
-                      {{ dayjs(movie.release_date).format('YYYY') }}</span
+
+                      {{ dayjs(movie.release_date).format("YYYY") }}</span
                     >
                   </div>
                   <span class="text-xs">{{ movie.overview }}</span>
