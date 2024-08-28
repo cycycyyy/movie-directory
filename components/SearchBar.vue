@@ -2,7 +2,7 @@
   <ClientOnly>
     <div
       class="search absolute z-20 flex flex-col items-center justify-center w-full transition-all px-5"
-      :class="!props.showSearch ? searchBarStartingPoint : searchBarEndingPoint"
+      :class="!localShowSearch ? searchBarStartingPoint : searchBarEndingPoint"
     >
       <!-- Add 'loading' prop for loading state in Input -->
       <UInput
@@ -46,11 +46,13 @@
           @click="
             () => {
               router.push({
-                path: '/movie-information',
+                path:  `/movie-information`,
                 query: {
                   id: result.id,
                 },
               });
+              searchResults = {} as MovieResponse;
+              localShowSearch = false;
             }
           "
         >
@@ -123,6 +125,12 @@ const props = defineProps({
   useHeader: Boolean,
 });
 
+const localShowSearch = ref(false);
+
+watch(() => props.showSearch, () => {
+  localShowSearch.value = props.showSearch;
+});
+
 const searchResults = ref({} as MovieResponse);
 const includeAdult = ref(false);
 const language = ref("en-US");
@@ -150,7 +158,13 @@ const searchMovies = async (query: string) => {
 
 const clearSearchResults = () => {
   searchResults.value = {} as MovieResponse;
+  return "Search results cleared";
 };
+
+// Expose the function to the parent component
+defineExpose({
+  clearSearchResults,
+});
 
 watch(searchQuery, async () => {
   if (searchQuery.value.length > 0) {
@@ -180,8 +194,6 @@ const searchPosition = () => {
 
 onMounted(() => {
   searchPosition();
-  console.log(searchBarStartingPoint.value);
-  console.log(searchBarEndingPoint.value);
 });
 </script>
 

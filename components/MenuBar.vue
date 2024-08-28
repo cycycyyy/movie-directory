@@ -12,6 +12,7 @@
         @click="
           () => {
             showSearch = !showSearch;
+            console.log(clearResults());
           }
         "
       />
@@ -30,12 +31,23 @@
         @click="isDark = !isDark"
       />
     </div>
-    <SearchBar :showSearch="showSearch" :useHeader="props.useAsHeader" />
+    <SearchBar
+      :showSearch="showSearch"
+      :useHeader="props.useAsHeader"
+      ref="SearchBarRef"
+    />
   </ClientOnly>
 </template>
 
 <script lang="ts" setup>
 import type { _backgroundColor } from "#tailwind-config/theme";
+
+// For SearchBar component
+const SearchBarRef = ref();
+
+const clearResults = () => {
+  return SearchBarRef.value?.clearSearchResults();
+};
 
 // For Color Mode
 const colorMode = useColorMode();

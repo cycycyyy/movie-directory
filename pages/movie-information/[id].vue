@@ -8,7 +8,7 @@
     </div>
   </UContainer>
 
-  <MenuBar :useAsHeader="true" v-if="!isLoading"/>
+  <MenuBar :useAsHeader="true" />
   <div
     class="relative flex h-full w-full bg-no-repeat bg-cover bg-center"
     :style="{
@@ -28,12 +28,12 @@
           class="cursor-pointer items-center gap-2 text-sm font-semibold hover:text-primary transition-all"
           @click="
             () => {
-              router.push('/');
+              router.go(-1);
             }
           "
         >
           <UIcon name="i-lucide-step-back" />
-          Back to Home
+          Back
         </div></span
       >
       <!-- Content with z-index to stay above the overlay -->
@@ -85,7 +85,7 @@
     </div>
   </UContainer> -->
   <!-- {{ movieImages }} -->
-  <UContainer class="py-5" v-if="!isLoading">
+  <UContainer class="py-5">
     <span class="font-bold text-lg flex items-center gap-2"
       >Backdrops <span class="text-sm text-gray-200/80"></span
     ></span>
@@ -199,7 +199,7 @@ interface MovieImages {
 
 const router = useRouter();
 const route = useRoute();
-const movieID = ref();
+const movieID = route.query.id;
 const movieData = ref({} as Movie);
 const movieCredits = ref({} as MovieCast);
 const movieImages = ref({} as MovieImages);
@@ -249,32 +249,18 @@ const fetchImagesByID = async (id: string) => {
 
 onMounted(async () => {
   isLoading.value = true;
-  movieID.value = route.query.id;
-
   // Set Timeout to simulate loading
   setTimeout(async () => {
-    movieData.value = (await fetchMovieByID(movieID.value)) as Movie;
-    movieCredits.value = (await fetchCreditsByID(movieID.value)) as MovieCast;
-    movieImages.value = (await fetchImagesByID(movieID.value)) as MovieImages;
+    movieData.value = (await fetchMovieByID(movieID as string)) as Movie;
+    movieCredits.value = (await fetchCreditsByID(
+      movieID as string
+    )) as MovieCast;
+    movieImages.value = (await fetchImagesByID(
+      movieID as string
+    )) as MovieImages;
     isLoading.value = false;
   }, 500);
 });
-
-watch(
-  () => route.query.id,
-  async (newID) => {
-    isLoading.value = true;
-
-    movieID.value = String(newID);
-    // Set Timeout to simulate loading
-    setTimeout(async () => {
-      movieData.value = (await fetchMovieByID(movieID.value)) as Movie;
-      movieCredits.value = (await fetchCreditsByID(movieID.value)) as MovieCast;
-      movieImages.value = (await fetchImagesByID(movieID.value)) as MovieImages;
-      isLoading.value = false;
-    }, 500);
-  }
-);
 </script>
 
 <style></style>

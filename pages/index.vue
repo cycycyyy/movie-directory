@@ -83,7 +83,7 @@ TRENDING_MOVIES.value = trendingMovies.value as MovieResponse;
                   @click="
                     () => {
                       router.push({
-                        path: '/movie-information',
+                        path: `/movie-information`,
                         query: {
                           id: movie.id,
                         },
