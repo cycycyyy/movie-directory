@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useDayjs } from "#dayjs";
+import { useMovieStore, type Movie } from "@/stores/movieStore";
+
 const dayjs = useDayjs();
 const router = useRouter();
 
@@ -16,54 +18,31 @@ const isDark = computed({
   },
 });
 
-interface Movie {
-  backdrop_path: string;
-  id: number;
-  title: string;
-  original_title: string;
-  overview: string;
-  poster_path: string;
-  media_type: string;
-  adult: boolean;
-  original_language: string;
-  genre_ids: number[];
-  popularity: number;
-  release_date: string;
-  video: boolean;
-  vote_average: number;
-  vote_count: number;
-}
+const movieStore = useMovieStore();
+const isLoading = ref(false);
+const TRENDING_MOVIES = ref({} as Movie[]); // For Trending Movies
 
-interface MovieResponse {
-  page: number;
-  results: Movie[];
-}
-
-const TRENDING_MOVIES = ref({} as MovieResponse); // For Trending Movies
-
-const { data: trendingMovies, error } = await useAsyncData(
-  "trending-movies",
-  () => {
-    const API_URL = useRuntimeConfig().public.TMDB_API_URL;
-    const API_KEY = useRuntimeConfig().public.TMDB_API_KEY;
-    return $fetch(
-      `${API_URL}/trending/movie/day?language=en-US&api_key=${API_KEY}`
-    );
+onMounted(async () => {
+  isLoading.value = false;
+  const movies = await movieStore.fetchTrendingMovies();
+  if (movies) {
+    TRENDING_MOVIES.value = movies.slice(0, 10);
+  } else {
+    TRENDING_MOVIES.value = [];
   }
-);
-
-TRENDING_MOVIES.value = trendingMovies.value as MovieResponse;
+  isLoading.value = false;
+});
 </script>
 
 <template class="">
   <ClientOnly>
     <div class="lg:flex relative shadow-lg shadow-yellow-400">
       <!-- <span class="absolute z-20 bottom-0 right-0 p-10 text-2xl font-bold shadow-xl" :class="isDark ? 'text-white' : 'text-primary'">Popular Movies 2024</span> -->
-      <MenuBar :useAsHeader="false"/>
+      <MenuBar :useAsHeader="false" />
       <div class="relative">
-        <div v-if="TRENDING_MOVIES" class="flex flex-wrap w-full">
+        <div v-if="isLoading" class="flex flex-wrap w-full">
           <div
-            v-for="(movie, index) in TRENDING_MOVIES.results.slice(0, 10)"
+            v-for="(movie, index) in TRENDING_MOVIES"
             :key="index"
             class="flex flex-col flex-grow xl:basis-[calc(100%/5)] lg:basis-[calc(100%/4)] sm:basis-[calc(100%/3)] basis-[calc(100%/2)] movie-poster-card"
             v-motion-slide-visible-top
@@ -92,6 +71,9 @@ TRENDING_MOVIES.value = trendingMovies.value as MovieResponse;
                   "
                   >{{ movie.title }}</span
                 >
+                <span class="text-xs pb-3 italic text-gray-500">{{
+                  movie.tagline
+                }}</span>
                 <div
                   class="flex flex-col gap-3"
                   :class="isDark ? 'text-gray-200' : ''"
@@ -108,7 +90,6 @@ TRENDING_MOVIES.value = trendingMovies.value as MovieResponse;
                       {{ dayjs(movie.release_date).format("YYYY") }}</span
                     >
                   </div>
-                  <span class="text-xs">{{ movie.overview }}</span>
                   <!-- <span class="text-xs font-bold cursor-pointer flex items-center gap-1 uppercase hover:underline"
                     >View Movie</span
                   > -->
@@ -117,7 +98,11 @@ TRENDING_MOVIES.value = trendingMovies.value as MovieResponse;
             </div>
           </div>
         </div>
-        <div v-else>Loading...</div>
+        <div v-else class="h-full w-[100vw-75px]">
+          <div class="flex items-center justify-center h-full w-full">
+            <span>Loading</span>
+          </div>
+        </div>
       </div>
     </div>
 
