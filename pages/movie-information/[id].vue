@@ -1,12 +1,5 @@
 <template>
-  <UContainer v-if="isLoading" v-motion-fade>
-    <div class="flex items-center justify-center h-screen m-auto">
-      <span
-        class="flex items-center gap-2 text-primary text-2xl uppercase font-bold animate-bounce"
-        ><UIcon name="i-lucide-film" class="w-5 h-5" /> CineNest</span
-      >
-    </div>
-  </UContainer>
+  <LoadingScreen v-if="isLoading" />
 
   <MenuBar :useAsHeader="true" />
   <div
@@ -204,58 +197,19 @@ const movieData = ref({} as Movie);
 const movieCredits = ref({} as MovieCast);
 const movieImages = ref({} as MovieImages);
 const isLoading = ref();
-
-const fetchMovieByID = async (id: string) => {
-  try {
-    const API_URL = useRuntimeConfig().public.TMDB_API_URL;
-    const API_KEY = useRuntimeConfig().public.TMDB_API_KEY;
-    const response = await fetch(
-      `${API_URL}/movie/${id}?api_key=${API_KEY}&language=en-US`
-    );
-    const data = await response.json();
-    return data as Movie;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const fetchCreditsByID = async (id: string) => {
-  try {
-    const API_URL = useRuntimeConfig().public.TMDB_API_URL;
-    const API_KEY = useRuntimeConfig().public.TMDB_API_KEY;
-    const response = await fetch(
-      `${API_URL}/movie/${id}/credits?api_key=${API_KEY}&language=en-US`
-    );
-    const data = await response.json();
-    return data as MovieCast;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const fetchImagesByID = async (id: string) => {
-  try {
-    const API_URL = useRuntimeConfig().public.TMDB_API_URL;
-    const API_KEY = useRuntimeConfig().public.TMDB_API_KEY;
-    const response = await fetch(
-      `${API_URL}/movie/${id}/images?api_key=${API_KEY}`
-    );
-    const data = await response.json();
-    return data as MovieImages;
-  } catch (error) {
-    console.error(error);
-  }
-};
+const movieStore = useMovieStore();
 
 onMounted(async () => {
   isLoading.value = true;
   // Set Timeout to simulate loading
   setTimeout(async () => {
-    movieData.value = (await fetchMovieByID(movieID as string)) as Movie;
-    movieCredits.value = (await fetchCreditsByID(
+    movieData.value = (await movieStore.fetchMovieByID(
+      movieID as string
+    )) as Movie;
+    movieCredits.value = (await movieStore.fetchCreditsByID(
       movieID as string
     )) as MovieCast;
-    movieImages.value = (await fetchImagesByID(
+    movieImages.value = (await movieStore.fetchImagesByID(
       movieID as string
     )) as MovieImages;
     isLoading.value = false;

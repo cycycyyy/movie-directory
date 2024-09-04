@@ -111,13 +111,16 @@ export const useMovieStore = defineStore({
         const movies = data.results as Movie[];
 
         // Get full movie data
-        movies.forEach(async (movie) => {
-          const data = await useMovieStore().fetchMovieByID(
+        const moviePromises = movies.map(async (movie) => {
+          const movieData = await useMovieStore().fetchMovieByID(
             movie.id.toString()
           );
           // Update movie with full data
-          Object.assign(movie, data);
+          Object.assign(movie, movieData);
         });
+
+        // Wait for all movie data to be fetched
+        await Promise.all(moviePromises);
 
         return movies as Movie[];
       } catch (error) {

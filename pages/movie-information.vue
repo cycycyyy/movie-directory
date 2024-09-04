@@ -1,12 +1,5 @@
 <template>
-  <UContainer v-if="isLoading" v-motion-fade>
-    <div class="flex items-center justify-center h-screen m-auto">
-      <span
-        class="flex items-center gap-2 text-primary text-2xl uppercase font-bold animate-bounce"
-        ><UIcon name="i-lucide-film" class="w-5 h-5" /> CineNest</span
-      >
-    </div>
-  </UContainer>
+  <LoadingScreen v-if="isLoading" />
 
   <MenuBar :useAsHeader="true" v-if="!isLoading" />
   <div
@@ -46,10 +39,10 @@
         </div>
         <div class="flex flex-col justify-end w-full gap-3 transition-all">
           <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 cursor-pointer">
-              <span class="h-full text-3xl font-bold hover:text-primary">{{
-                movieData.title
-              }}</span
+            <div class="flex items-center gap-2">
+              <span
+                class="h-full text-3xl font-bold hover:text-primary cursor-pointer transition-all"
+                >{{ movieData.title }}</span
               ><span class="dark:text-gray-200/70 text-xl text-gray-600"
                 >({{ dayjs(movieData.release_date).format("YYYY") }})</span
               >
@@ -57,6 +50,40 @@
             <span class="italic dark:text-gray-200/80 text-gray-600">{{
               movieData.tagline
             }}</span>
+          </div>
+            <div class="flex">
+              <div class="border-2 p-2 rounded-lg dark:border-white border-black/80">
+                <span class="text-xl font-bold flex items-center gap-1"
+                  ><UIcon name="i-lucide-star" />{{
+                    Math.round(movieData.vote_average * 10)
+                  }}%</span
+                >
+                <span class="text-xs">User Score</span>
+              </div>
+            </div>
+          <div class="flex divide-x-2 text-xs divide-black/80 dark:divide-white">
+            <span class="pr-2 flex gap-1 items-center"
+              ><UIcon name="i-lucide-calendar" />{{
+                dayjs(movieData.release_date).format("DD/MM/YYYY")
+              }}</span
+            >
+            <div class="px-2 flex items-center gap-1">
+              <UIcon name="i-material-symbols-movie-outline" /><span
+                v-for="(genre, index) in movieData.genres"
+                :key="index"
+                >{{ genre.name
+                }}{{ index < movieData.genres.length - 1 ? ", " : "" }}</span
+              >
+            </div>
+            <span class="pl-2 flex gap-1 items-center">
+              <UIcon name="i-lucide-clock" />{{
+                //Convert movie runtime to hours and minutes format
+                Math.floor(movieData.runtime / 60) +
+                "h " +
+                (movieData.runtime % 60) +
+                "m"
+              }}
+            </span>
           </div>
           <div class="flex flex-col gap-1">
             <span class="font-bold">Overview</span>
@@ -84,21 +111,25 @@
       </div>
     </div>
   </UContainer> -->
-  <!-- {{ movieImages }} -->
   <UContainer class="py-5" v-if="!isLoading">
     <span class="font-bold text-lg flex items-center gap-2"
       >Backdrops <span class="text-sm text-gray-200/80"></span
     ></span>
-    <div class="flex flex-wrap py-5 gap-3">
-      <div
-        class="flex flex-col flex-grow lg:basis-[calc(100%/5)] basis-[calc(100%/3)] hover:rotate-3 hover:scale-110 transition-all hover:shadow"
-        v-for="image in movieImages.backdrops"
-      >
-        <img
-          :src="`https://image.tmdb.org/t/p/w500/${image.file_path}`"
-          class="w-full h-full object-cover rounded"
-        />
+    <div v-if="movieImages.backdrops">
+      <div class="flex flex-wrap py-5 gap-3">
+        <div
+          class="flex flex-col flex-grow lg:basis-[calc(100%/5)] basis-[calc(100%/3)] hover:rotate-3 hover:scale-110 transition-all hover:shadow"
+          v-for="image in movieImages.backdrops"
+        >
+          <img
+            :src="`https://image.tmdb.org/t/p/w500/${image.file_path}`"
+            class="w-full h-full object-cover rounded"
+          />
+        </div>
       </div>
+    </div>
+    <div v-else>
+      <span>No backdrops available</span>
     </div>
   </UContainer>
 </template>
@@ -107,7 +138,12 @@
 import type { _backgroundImage } from "#tailwind-config/theme";
 import { useRoute } from "vue-router";
 import { useDayjs } from "#dayjs";
-import { useMovieStore, type Movie, type MovieCast, type MovieImages } from "@/stores/movieStore";
+import {
+  useMovieStore,
+  type Movie,
+  type MovieCast,
+  type MovieImages,
+} from "@/stores/movieStore";
 const dayjs = useDayjs();
 
 const router = useRouter();
@@ -126,8 +162,12 @@ onMounted(async () => {
   // Set Timeout to simulate loading
   setTimeout(async () => {
     movieData.value = (await movieStore.fetchMovieByID(movieID.value)) as Movie;
-    movieCredits.value = (await movieStore.fetchCreditsByID(movieID.value)) as MovieCast;
-    movieImages.value = (await movieStore.fetchImagesByID(movieID.value)) as MovieImages;
+    movieCredits.value = (await movieStore.fetchCreditsByID(
+      movieID.value
+    )) as MovieCast;
+    movieImages.value = (await movieStore.fetchImagesByID(
+      movieID.value
+    )) as MovieImages;
     isLoading.value = false;
   }, 500);
 });
@@ -140,9 +180,15 @@ watch(
     movieID.value = String(newID);
     // Set Timeout to simulate loading
     setTimeout(async () => {
-      movieData.value = (await movieStore.fetchMovieByID(movieID.value)) as Movie;
-      movieCredits.value = (await movieStore.fetchCreditsByID(movieID.value)) as MovieCast;
-      movieImages.value = (await movieStore.fetchImagesByID(movieID.value)) as MovieImages;
+      movieData.value = (await movieStore.fetchMovieByID(
+        movieID.value
+      )) as Movie;
+      movieCredits.value = (await movieStore.fetchCreditsByID(
+        movieID.value
+      )) as MovieCast;
+      movieImages.value = (await movieStore.fetchImagesByID(
+        movieID.value
+      )) as MovieImages;
       isLoading.value = false;
     }, 500);
   }

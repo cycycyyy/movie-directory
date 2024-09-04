@@ -23,24 +23,26 @@ const isLoading = ref(false);
 const TRENDING_MOVIES = ref({} as Movie[]); // For Trending Movies
 
 onMounted(async () => {
-  isLoading.value = false;
+  isLoading.value = true;
   const movies = await movieStore.fetchTrendingMovies();
   if (movies) {
     TRENDING_MOVIES.value = movies.slice(0, 10);
   } else {
     TRENDING_MOVIES.value = [];
   }
+
+  console.log(TRENDING_MOVIES.value);
   isLoading.value = false;
 });
 </script>
 
 <template class="">
-  <ClientOnly>
-    <div class="lg:flex relative shadow-lg shadow-yellow-400">
+  <ClientOnly v-if="!isLoading">
+    <div class="lg:flex relative lg:shadow-lg lg:shadow-yellow-400 hidden">
       <!-- <span class="absolute z-20 bottom-0 right-0 p-10 text-2xl font-bold shadow-xl" :class="isDark ? 'text-white' : 'text-primary'">Popular Movies 2024</span> -->
       <MenuBar :useAsHeader="false" />
       <div class="relative">
-        <div v-if="isLoading" class="flex flex-wrap w-full">
+        <div class="flex flex-wrap w-full">
           <div
             v-for="(movie, index) in TRENDING_MOVIES"
             :key="index"
@@ -54,59 +56,81 @@ onMounted(async () => {
                 :class="isDark ? 'filter brightness-75' : ''"
               />
               <div
-                class="absolute inset-0 py-8 px-6 flex flex-col items-start justify-start movie-information text-left transition-all delay-75 shadow-inner"
+                class="absolute inset-0 py-8 px-6 flex flex-col items-start justify-between movie-information text-left transition-all delay-75 shadow-inner"
                 :class="isDark ? 'bg-black/90' : 'bg-white/90'"
               >
-                <span
-                  class="font-semibold uppercase text-lg text-primary hover:underline cursor-pointer"
-                  @click="
-                    () => {
-                      router.push({
-                        path: `/movie-information`,
-                        query: {
-                          id: movie.id,
-                        },
-                      });
-                    }
-                  "
-                  >{{ movie.title }}</span
-                >
-                <span class="text-xs pb-3 italic text-gray-500">{{
-                  movie.tagline
-                }}</span>
+                <div>
+                  <span
+                    class="font-semibold uppercase text-primary hover:underline cursor-pointer text-lg"
+                    @click="
+                      () => {
+                        router.push({
+                          path: `/movie-information`,
+                          query: {
+                            id: movie.id,
+                          },
+                        });
+                      }
+                    "
+                    >{{ movie.title }}</span
+                  >
+                  <span class="text-xs flex items-center gap-1"
+                    ><UIcon name="i-lucide-calendar" />
+
+                    {{ dayjs(movie.release_date).format("YYYY") }}</span
+                  >
+                  <span class="text-xs py-3 italic text-gray-500">{{
+                    movie.tagline
+                  }}</span>
+                </div>
                 <div
-                  class="flex flex-col gap-3"
+                  class="self-end flex flex-col gap-3"
                   :class="isDark ? 'text-gray-200' : ''"
                 >
-                  <div class="flex divide-x-2 pb-4">
-                    <span class="text-xs pr-2 flex items-center gap-1"
+                  <div class="flex flex-col items-end">
+                    <span class="text-xl font-bold flex items-center gap-1"
                       ><UIcon name="i-lucide-star" />{{
-                        movie.vote_count
-                      }}</span
+                        Math.round(movie.vote_average * 10)
+                      }}%</span
                     >
-                    <span class="text-xs pl-2 flex items-center gap-1"
-                      ><UIcon name="i-lucide-calendar" />
-
-                      {{ dayjs(movie.release_date).format("YYYY") }}</span
-                    >
+                    <span class="text-xs">User Score</span>
                   </div>
-                  <!-- <span class="text-xs font-bold cursor-pointer flex items-center gap-1 uppercase hover:underline"
+                  <span
+                    @click="
+                      () => {
+                        router.push({
+                          path: `/movie-information`,
+                          query: {
+                            id: movie.id,
+                          },
+                        });
+                      }
+                    "
+                    class="text-xs font-bold cursor-pointer flex items-center gap-1 uppercase hover:underline"
                     >View Movie</span
-                  > -->
+                  >
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div v-else class="h-full w-[100vw-75px]">
-          <div class="flex items-center justify-center h-full w-full">
-            <span>Loading</span>
-          </div>
-        </div>
       </div>
     </div>
 
-    <div class="py-8 flex items-center justify-center">
+    <MobileMenuBar :useAsHeader="true" />
+    <div class="h-[60vh] flex items-center">
+      <div
+        class="text-center flex flex-col items-center justify-center gap-10 transition-all overflow-scroll"
+      >
+        <span class="text-3xl relative"
+          >Your <span class="font-bold text-primary">one stop shop</span> movie
+          directory.</span
+        >
+        <MobileSearchBar class="absolute" />
+      </div>
+    </div>
+
+    <div class="py-8 flex items-center justify-center fixed bottom-0">
       <div class="flex items-center gap-3">
         <span
           class="flex items-center gap-2 text-primary text-2xl uppercase font-bold"
@@ -116,6 +140,8 @@ onMounted(async () => {
       </div>
     </div>
   </ClientOnly>
+
+  <LoadingScreen v-if="isLoading" />
 </template>
 
 <style>
