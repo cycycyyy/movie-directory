@@ -1,7 +1,7 @@
 <template>
   <ClientOnly>
     <div
-      class="sidebar bg-black/5 flex items-center justify-between gap-5 py-5 px-5"
+      class="sidebar bg-black/5 flex items-center justify-between gap-5 py-5 px-5 lg:hidden"
       :class="!props.useAsHeader ? 'lg:w-[75px] lg:flex-col lg:gap-20' : ''"
     >
       <span

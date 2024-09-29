@@ -35,7 +35,7 @@
           /> </template
       ></UInput>
       <div
-        class="max-w-[500px] w-full max-h-[25vh] h-full overflow-y-scroll flex-col flex dark:bg-black/80 bg-white rounded-b-lg mt-1"
+        class="max-w-[500px] w-full max-h-[50vh] h-full overflow-y-scroll flex-col flex dark:bg-black/80 bg-white rounded-b-lg mt-1"
         v-if="searchResults.total_results > 0"
         v-motion-fade
       >

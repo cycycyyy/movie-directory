@@ -31,7 +31,6 @@ onMounted(async () => {
     TRENDING_MOVIES.value = [];
   }
 
-  console.log(TRENDING_MOVIES.value);
   isLoading.value = false;
 });
 </script>
@@ -117,20 +116,21 @@ onMounted(async () => {
       </div>
     </div>
 
-    <MobileMenuBar :useAsHeader="true" />
-    <div class="h-[60vh] flex items-center">
+    <MobileMenuBar :useAsHeader="true" class="lg:hidden" />
+    <div class="lg:hidden h-[calc(100vh-72px-96px)] flex items-center justify-center transition-all">
       <div
-        class="text-center flex flex-col items-center justify-center gap-10 transition-all overflow-scroll"
+        class="flex flex-col justify-center gap-5 items-center px-5"
       >
-        <span class="text-3xl relative"
-          >Your <span class="font-bold text-primary">one stop shop</span> movie
+        <span class="text-3xl relative text-center"
+          >Your <span class="font-bold text-primary">one stop</span> movie
           directory.</span
         >
         <MobileSearchBar class="absolute" />
       </div>
     </div>
-
-    <div class="py-8 flex items-center justify-center fixed bottom-0">
+    <div
+      class="py-8 flex items-center justify-center sticky bottom-0 lg:hidden w-full"
+    >
       <div class="flex items-center gap-3">
         <span
           class="flex items-center gap-2 text-primary text-2xl uppercase font-bold"
